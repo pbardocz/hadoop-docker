@@ -3,4 +3,8 @@
         <name>mapreduce.framework.name</name>
         <value>yarn</value>
     </property>
+    <property>
+        <name>mapred.map.output.compression.codec</name>
+        <value>com.hadoop.compression.lzo.LzoCodec</value>
+    </property>
 </configuration>

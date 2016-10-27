@@ -20,11 +20,10 @@ RUN ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key
 RUN ssh-keygen -q -N "" -t rsa -f /root/.ssh/id_rsa
 RUN cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
 
-
 # java
-RUN curl -LO 'http://download.oracle.com/otn-pub/java/jdk/7u71-b14/jdk-7u71-linux-x64.rpm' -H 'Cookie: oraclelicense=accept-securebackup-cookie'
-RUN rpm -i jdk-7u71-linux-x64.rpm
-RUN rm jdk-7u71-linux-x64.rpm
+RUN curl -LO 'http://download.oracle.com/otn-pub/java/jdk/8u73-b02/jdk-8u73-linux-x64.rpm' -H 'Cookie: oraclelicense=accept-securebackup-cookie'
+RUN rpm -i jdk-8u73-linux-x64.rpm
+RUN rm jdk-8u73-linux-x64.rpm
 
 ENV JAVA_HOME /usr/java/default
 ENV PATH $PATH:$JAVA_HOME/bin
@@ -66,6 +65,19 @@ RUN $HADOOP_PREFIX/bin/hdfs namenode -format
 # fixing the libhadoop.so like a boss
 RUN rm -rf /usr/local/hadoop/lib/native
 RUN mv /tmp/native /usr/local/hadoop/lib
+
+# add lzo support
+RUN yum install -y lzo lzo-devel hadooplzo hadooplzo-native gcc-c++
+RUN mkdir -p /tmp/protoc
+RUN curl -L https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz | tar -xz -C /tmp/protoc
+RUN cd /tmp/protoc/protobuf-2.5.0 && ./configure && make && make check && make install && ldconfig
+RUN rm -rf /tmp/protoc
+ADD lib/lzo/0.6.0/lib/native/Linux-amd64-64 /usr/local/hadoop/lib/native/
+RUN ln -s /usr/local/hadoop/lib/native/libgplcompression.so.0.0.0 /usr/local/hadoop/lib/native/libgplcompression.so
+RUN ln -s /usr/local/hadoop/lib/native/libgplcompression.so.0.0.0 /usr/local/hadoop/lib/native/llibgplcompression.so.0
+ADD lib/hadoop-lzo-0.6.0.2.4.3.0-227.jar /usr/local/hadoop/share/hadoop/hdfs/lib/
+ADD lib/hadoop-lzo-0.6.0.2.4.3.0-227.jar /usr/local/hadoop/share/hadoop/yarn/lib/
+ADD lib/hadoop-lzo-0.6.0.2.4.3.0-227.jar /usr/local/hadoop/share/hadoop/mapreduce/lib/
 
 ADD ssh_config /root/.ssh/config
 RUN chmod 600 /root/.ssh/config
