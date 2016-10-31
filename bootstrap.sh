@@ -26,3 +26,18 @@ fi
 if [[ $1 == "-bash" ]]; then
   /bin/bash
 fi
+
+if [[ $1 == "-job" ]]; then
+  echo "Running job '$2'"
+  # we wait 15 sec after HDFS start, to leave safe mode
+  sleep 15
+  $2
+  if [ $? -eq 0 ]
+    then
+        echo "Successfully run job '$2'"
+        exit 0
+    else
+        echo "Failed to run job '$2'"
+        exit 1
+    fi
+fi
