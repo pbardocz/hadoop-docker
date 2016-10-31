@@ -1,4 +1,5 @@
 #!/bin/bash
+#chkconfig: 345 99 10
 
 : ${HADOOP_PREFIX:=/usr/local/hadoop}
 
